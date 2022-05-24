@@ -1,0 +1,9 @@
+.spago/
+node_modules
+output/
+package-lock.json
+.vscode
+.pulp-cache
+.psc-ide-port
+bower_components
+generated-docs/
