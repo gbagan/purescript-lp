@@ -10,7 +10,6 @@ import Data.LinearAlgebra.Matrix (Matrix)
 import Data.LinearAlgebra.Vector as V
 import Data.LinearAlgebra.Vector (Vector)
 import Data.LinearProgramming.Class (class OrderedField)
--- import Debug (spy)
 
 empty :: forall a. Vector a
 empty = V.fromArray []
@@ -38,14 +37,14 @@ simplex matA b obj = go initB initN b
   go setB setN xB =
     let
       optB = V.fromArray $ V.index obj' <$> setB
-      matB = M.fromColumns m m (M.column matA' <$> setB)
+      matB =  M.fromColumns m m (M.column matA' <$> setB)
       y = fromMaybe empty $ M.solveLinearSystem' (M.transpose matB) optB
     in
       case sort setN # find \j -> V.index obj' j - y `V.dot` M.column matA' j > zero of
         Nothing -> Just $ V.fromArray $ replicate n zero # updateAtIndices (zip setB (V.toArray xB))
         Just j0 ->
           let
-            d = fromMaybe empty $ M.solveLinearSystem' matB (M.column matA j0)
+            d = fromMaybe empty $ M.solveLinearSystem' matB (M.column matA' j0)
           in
             case 0 .. (m - 1)
                 # filter (\j -> V.index d j > zero)

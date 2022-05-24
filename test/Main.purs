@@ -1,8 +1,6 @@
 module Test.Main where
 
 import Prelude
-
-import Data.Array as Array
 import Data.Maybe (Maybe(..))
 import Data.Rational ((%))
 import Effect (Effect)
@@ -11,7 +9,7 @@ import Data.LinearAlgebra.Matrix as M
 import Data.LinearAlgebra.Vector as V
 import Data.LinearProgramming.Simplex (simplex)
 import Test.Spec (describe, it)
-import Test.Spec.Assertions (shouldEqual, shouldSatisfy)
+import Test.Spec.Assertions (shouldEqual)
 import Test.Spec.Reporter.Console (consoleReporter)
 import Test.Spec.Runner (runSpec)
 
@@ -25,4 +23,5 @@ main = launchAff_ $ runSpec [consoleReporter] do
                                 ] <#> (_ % 1)
         let b = V.fromArray [42, 17, 24] <#> (_ % 1)
         let obj = V.fromArray [7, 9, 18, 17] <#> (_ % 1)
-        simplex a b obj `shouldEqual` Nothing
+        let sol = V.fromArray [3, 0, 7, 0] <#> (_ % 1)
+        simplex a b obj `shouldEqual` Just sol
