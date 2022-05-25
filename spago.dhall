@@ -3,6 +3,7 @@
 , repository = "https://github.com/gbagan/purescript-lp"
 , dependencies =
   [ "arrays"
+  , "bifunctors"
   , "either"
   , "foldable-traversable"
   , "linalg"

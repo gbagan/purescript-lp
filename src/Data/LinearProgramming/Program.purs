@@ -17,6 +17,7 @@ module Data.LinearProgramming.Program
 import Prelude
 import Prim hiding (Constraint)
 import Data.Array ((!!), length, mapWithIndex, replicate, updateAtIndices)
+import Data.Bifunctor (lmap)
 import Data.Either (Either)
 import Data.Set as Set
 import Data.Map (Map)
@@ -107,5 +108,6 @@ solveLinearProgram program@(Program {objective, constraints}) = do
   exprToVec (Expr e) = 
     let
       update :: Array _
-      update = Map.toUnfoldable e <#> \(Tuple v c) -> Tuple (fromMaybe (-1) $ Map.lookup v reverseVars) c
-    in replicate m zero # updateAtIndices update
+      update = Map.toUnfoldable e <#> lmap \v -> fromMaybe (-1) (Map.lookup v reverseVars)
+    in
+      replicate m zero # updateAtIndices update
