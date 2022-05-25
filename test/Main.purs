@@ -70,3 +70,17 @@ main = launchAff_ $ runSpec [consoleReporter] do
         let obj = V.fromArray [2%1, 0%1, 3%2]
         let sol = V.fromArray [1, 0, 2] <#> (_ % 1)
         simplex a b obj `shouldEqual` Right sol
+
+      it "simplex 6 (infinite number of solutions)" do
+        let a = M.fromArray 8 6 [ [5, 10, 10, 5, 1, 7]
+                                , [-5, -10, -10, -5, -1, -7]
+                                , [1, 0, 0, 0, 0, 0]
+                                , [0, 1, 0, 0, 0, 0]
+                                , [0, 0, 1, 0, 0, 0]
+                                , [0, 0, 0, 1, 0, 0]
+                                , [0, 0, 0, 0, 1, 0]
+                                , [0, 0, 0, 0, 0, 1]
+                                ] <#> (_ % 1)
+        let b = V.fromArray [25, -25, 1, 1, 1, 1, 1, 1] <#> (_ % 1)
+        let obj = V.fromArray [10, 8, 15, 4, 1, 5] <#> (_ % 1)
+        (simplex a b obj <#> (_ `V.dot` obj)) `shouldEqual` Right (166%5)
