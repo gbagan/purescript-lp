@@ -2,8 +2,8 @@ module Data.LinearProgramming.Program where
 
 import Prelude
 import Prim hiding (Constraint)
-import Data.Array ((!!), filter, length, mapWithIndex, replicate, updateAtIndices)
-import Data.Either (Either(..))
+import Data.Array ((!!), length, mapWithIndex, replicate, updateAtIndices)
+import Data.Either (Either)
 import Data.Set as Set
 import Data.Map (Map)
 import Data.Map as Map
@@ -64,7 +64,7 @@ arrayOfVars (Program {objective, constraints})
     objVars = case objective of 
       Maximize expr -> exprVars expr
       Minimize expr -> exprVars expr
-    exprVars (Expr e) = Set.fromFoldable $ e <#> \(Atom v c) -> v
+    exprVars (Expr e) = Set.fromFoldable $ e <#> \(Atom v _) -> v
     cstrVars = Set.unions (cstrVars' <$> constraints)
     cstrVars' (LessOrEqual e _) = exprVars e
     cstrVars' (GreaterOrEqual e _) = exprVars e
