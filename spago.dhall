@@ -7,6 +7,8 @@
   , "foldable-traversable"
   , "linalg"
   , "maybe"
+  , "ordered-collections"
+  , "partial"
   , "prelude"
   , "rationals"
   , "tuples"

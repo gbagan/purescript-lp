@@ -27,6 +27,30 @@ module Main where
 import Prelude
 import Data.Rational ((%))
 import Effect (Effect)
+import Data.LinearProgramming.Program (Program(..), Objective(..), (++), (**), (&<=&), solveLinearProgram)
+import Effect.Console (logShow)
+
+main :: Effect Unit
+main = do
+  let p = Program 
+    { objective: Maximize $ 7 ** "x1" ++ 9 ** "x2" ++ 18 ** "x3" ++ 17 ** "x4"
+    , constraints: 
+        [ 2 ** "x1" ++ 4 ** "x2" ++ 5 ** "x3" ++ 7 ** "x4" &<=& 42
+        , 1 ** "x1" ++ 1 ** "x2" ++ 2 ** "x3" ++ 2 ** "x4" &<=& 17
+        , 1 ** "x1" ++ 2 ** "x2" ++ 3 ** "x3" ++ 3 ** "x4" &<=& 24
+        ]
+    } <#> (_ % 1)
+  logShow $ solveLinearProgram p
+```
+
+or alternatively
+
+```purescript
+module Main where
+
+import Prelude
+import Data.Rational ((%))
+import Effect (Effect)
 import Data.LinearAlgebra.Matrix as M
 import Data.LinearAlgebra.Vector as V
 import Data.LinearProgramming.Simplex (simplex)

@@ -8,6 +8,9 @@ import Effect.Aff (launchAff_)
 import Data.LinearAlgebra.Matrix as M
 import Data.LinearAlgebra.Vector as V
 import Data.LinearProgramming.Simplex (Error(..), simplex)
+import Data.LinearProgramming.Program (Program(..), Objective(..), (++), (**), (&<=&), (&==&), solveLinearProgram)
+import Data.Map as Map
+import Data.Tuple (Tuple(..))
 import Test.Spec (describe, it)
 import Test.Spec.Assertions (shouldEqual)
 import Test.Spec.Reporter.Console (consoleReporter)
@@ -84,3 +87,25 @@ main = launchAff_ $ runSpec [consoleReporter] do
         let b = V.fromArray [25, -25, 1, 1, 1, 1, 1, 1] <#> (_ % 1)
         let obj = V.fromArray [10, 8, 15, 4, 1, 5] <#> (_ % 1)
         (simplex a b obj <#> (_ `V.dot` obj)) `shouldEqual` Right (166%5)
+
+      it "simplex 7 (0 is an optimal solution)" do
+        let a = M.fromArray 2 6 [ [5, 10, 10, 5, 1, 7]
+                                , [5, 10, 10, 5, 1, 7]
+                                ] <#> (_ % 1)
+        let b = V.fromArray [0, 0] <#> (_ % 1)
+        let obj = V.fromArray [1, 1, 1, 1, 1, 1] <#> (_ % 1)
+        let sol = V.fromArray [0, 0, 0, 0, 0, 0] <#> (_ % 1)
+        simplex a b obj `shouldEqual` Right sol
+
+
+    describe "program" do
+      it "program 1" do
+        let p = Program 
+                 { objective: Maximize $ -1 ** "x1" ++ 2 ** "x2"
+                 , constraints: 
+                     [ 2 ** "x1" ++ (-1) ** "x2" &<=& 12
+                     , 3 ** "x1" ++ 4 ** "x2" &==& 12
+                     ]
+                 } <#> (_ % 1)
+        let sol = Map.fromFoldable [(Tuple "x1" $ 0 % 1),(Tuple "x2" $ 3 % 1)]
+        solveLinearProgram p `shouldEqual` Right sol
