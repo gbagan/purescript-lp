@@ -1,4 +1,18 @@
-module Data.LinearProgramming.Program where
+module Data.LinearProgramming.Program
+  ( Atom(..)
+  , Constraint(..)
+  , Expr(..)
+  , Objective(..)
+  , Program(..)
+  , atom
+  , solveLinearProgram
+  , (&<=&)
+  , (&==&)
+  , (&>=&)
+  , (**)
+  , (++)
+  )
+  where
 
 import Prelude
 import Prim hiding (Constraint)
