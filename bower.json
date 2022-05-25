@@ -1,0 +1,28 @@
+{
+    "name": "purescript-linalg",
+    "license": [
+        "MIT"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gbagan/purescript-linalg"
+    },
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "output"
+    ],
+    "dependencies": {
+        "purescript-arrays": "^v7.0.0",
+        "purescript-either": "^v6.0.0",
+        "purescript-foldable-traversable": "^v6.0.0",
+        "purescript-linalg": "https://github.com/gbagan/purescript-linalg.git#v5.1.0",
+        "purescript-maybe": "^v6.0.0",
+        "purescript-ordered-collections": "^v3.0.0",
+        "purescript-partial": "^v4.0.0",
+        "purescript-prelude": "^v6.0.0",
+        "purescript-rationals": "^v5.0.0",
+        "purescript-tuples": "^v7.0.0"
+    }
+}
