@@ -24,7 +24,6 @@ instance Show Error where
 empty :: forall a. Vector a
 empty = V.fromArray []
 
-
 simplex' :: forall a. OrderedField a => Matrix a -> Vector a -> Array Int -> Vector a -> Either Error (Vector a)
 simplex' matA obj initB initxB = go initB initN initxB
   where
@@ -83,26 +82,38 @@ canonicalForm mat = M.fromFunction r (r + c) fAug
     | i == j - c = one
     | otherwise = zero
 
+feasibleSolution :: forall a. OrderedField a => Matrix a -> Vector a -> Either Error { setB :: Array Int, xB :: Vector a }
+feasibleSolution matA b =
+  let
+    m = M.nrows matA
+    n = M.ncols matA    
+    mat' = auxMatrix matA b
+    obj' = V.fromArray $ replicate n zero <> replicate m (-one)
+  in
+  case simplex' mat' obj' (n .. (n + m - 1)) (abs <$> b) of
+    Left e -> Left e
+    Right x ->    
+      if V.dot obj' x < zero then
+        Left NoSolution
+      else
+        let 
+          setB' = 0 .. (n+m-1) # filter \j -> V.index x j > zero
+          setB = take m $ setB' <> difference ((n-m) .. (n-1)) setB'
+          xB = V.fromArray $ V.index x <$> setB
+        in
+          Right {setB, xB}
+
 simplex :: forall a. OrderedField a => Matrix a -> Vector a -> Vector a -> Either Error (Vector a)
 simplex matA b obj =
   let
     m = M.nrows matA
     n = M.ncols matA
     matA' = canonicalForm matA
-  -- search for a feasible solution    
-    matAux = auxMatrix matA' b
-    objAux = V.fromArray $ replicate (n+m) zero <> replicate m (-one)
   in
-  case simplex' matAux objAux ((n + m) .. (n + m + m - 1)) (abs <$> b) of
+  case feasibleSolution matA' b of
     Left e -> Left e
-    Right x ->    
-      if V.dot objAux x < zero then
-        Left NoSolution
-      else
-        let 
-          initB' = 0 .. (n+m-1) # filter \j -> V.index x j > zero
-          initB = take m $ initB' <> difference (n .. (n+m-1)) initB'
-          xB = V.fromArray $ V.index x <$> initB
+    Right {setB, xB} ->
+        let
           obj' = V.fromArray $ V.toArray obj <> replicate m zero
         in
-          simplex' matA' obj' initB xB <#> (V.fromArray <<< take n <<< V.toArray)
+          simplex' matA' obj' setB xB <#> (V.fromArray <<< take n <<< V.toArray)
