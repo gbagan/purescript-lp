@@ -3,7 +3,7 @@
 , repository = "https://github.com/gbagan/purescript-linalg"
 , dependencies =
   [ "arrays"
-  , "debug"
+  , "either"
   , "foldable-traversable"
   , "linalg"
   , "maybe"

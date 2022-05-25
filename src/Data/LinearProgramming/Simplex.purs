@@ -1,7 +1,8 @@
-module Data.LinearProgramming.Simplex (simplex) where
+module Data.LinearProgramming.Simplex (Error(..), simplex) where
 
 import Prelude
 import Data.Array ((..), (!!), difference, filter, find, replicate, sort, take, updateAtIndices, zip)
+import Data.Either (Either(..))
 import Data.Foldable (minimumBy)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Ord (abs, signum)
@@ -11,13 +12,20 @@ import Data.LinearAlgebra.Matrix (Matrix)
 import Data.LinearAlgebra.Vector as V
 import Data.LinearAlgebra.Vector (Vector)
 import Data.LinearProgramming.Class (class OrderedField)
-import Debug (spy)
+
+data Error = NoSolution | NotBounded
+
+derive instance Eq Error
+
+instance Show Error where
+  show NoSolution = "NoSolution"
+  show NotBounded = "NotBounded"
 
 empty :: forall a. Vector a
 empty = V.fromArray []
 
 
-simplex' :: forall a. OrderedField a => Matrix a -> Vector a -> Array Int -> Vector a -> Maybe (Vector a)
+simplex' :: forall a. OrderedField a => Matrix a -> Vector a -> Array Int -> Vector a -> Either Error (Vector a)
 simplex' matA obj initB initxB = go initB initN initxB
   where
   m = M.nrows matA
@@ -30,7 +38,7 @@ simplex' matA obj initB initxB = go initB initN initxB
       y = fromMaybe empty $ M.solveLinearSystem' (M.transpose matB) optB
     in
       case sort setN # find \j -> V.index obj j - y `V.dot` M.column matA j > zero of
-        Nothing -> Just $ V.fromArray $ replicate n zero # updateAtIndices (zip setB (V.toArray xB))
+        Nothing -> Right $ V.fromArray $ replicate n zero # updateAtIndices (zip setB (V.toArray xB))
         Just j0 ->
           let
             d = fromMaybe empty $ M.solveLinearSystem' matB (M.column matA j0)
@@ -39,7 +47,7 @@ simplex' matA obj initB initxB = go initB initN initxB
                 # filter (\j -> V.index d j > zero)
                 # minimumBy (comparing \j -> V.index xB j / V.index d j)
                 >>= \j -> Tuple (V.index xB j / V.index d j) <$> setB !! j of
-              Nothing -> Nothing
+              Nothing -> Left NotBounded
               Just (Tuple tmax i0) ->
                 let
                   setB' = setB <#> \v -> if v == i0 then j0 else v
@@ -75,25 +83,26 @@ canonicalForm mat = M.fromFunction r (r + c) fAug
     | i == j - c = one
     | otherwise = zero
 
-simplex :: forall a. OrderedField a => Matrix a -> Vector a -> Vector a -> Maybe (Vector a)
+simplex :: forall a. OrderedField a => Matrix a -> Vector a -> Vector a -> Either Error (Vector a)
 simplex matA b obj =
   let
     m = M.nrows matA
     n = M.ncols matA
-  -- search for a feasible solution
-    matAux = auxMatrix matA b
-    objAux = V.fromArray $ replicate n zero <> replicate n (-one)
+    matA' = canonicalForm matA
+  -- search for a feasible solution    
+    matAux = auxMatrix matA' b
+    objAux = V.fromArray $ replicate (n+m) zero <> replicate m (-one)
   in
-  case simplex' matAux objAux (n .. (m + n - 1)) (abs <$> b) of
-    Nothing -> Nothing
-    Just xB ->
-      let _ = spy "xB" xB in
-      if false then
-        Nothing
+  case simplex' matAux objAux ((n + m) .. (n + m + m - 1)) (abs <$> b) of
+    Left e -> Left e
+    Right x ->    
+      if V.dot objAux x < zero then
+        Left NoSolution
       else
         let 
-          matA' = canonicalForm matA
+          initB' = 0 .. (n+m-1) # filter \j -> V.index x j > zero
+          initB = take m $ initB' <> difference (n .. (n+m-1)) initB'
+          xB = V.fromArray $ V.index x <$> initB
           obj' = V.fromArray $ V.toArray obj <> replicate m zero
-          initB = n .. (m + n - 1)
         in
           simplex' matA' obj' initB xB <#> (V.fromArray <<< take n <<< V.toArray)
