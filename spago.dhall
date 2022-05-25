@@ -1,6 +1,6 @@
-{ name = "linalg"
+{ name = "lp"
 , license = "MIT"
-, repository = "https://github.com/gbagan/purescript-linalg"
+, repository = "https://github.com/gbagan/purescript-lp"
 , dependencies =
   [ "arrays"
   , "either"
