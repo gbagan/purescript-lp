@@ -24,6 +24,8 @@ instance Show Error where
 empty :: forall a. Vector a
 empty = V.fromArray []
 
+-- matA is in canonical form
+-- initxB is a feasible solution and initB a basis
 simplex' :: forall a. OrderedField a => Matrix a -> Vector a -> Array Int -> Vector a -> Either Error (Vector a)
 simplex' matA obj initB initxB = go initB initN initxB
   where
@@ -82,6 +84,7 @@ canonicalForm mat = M.fromFunction r (r + c) fAug
     | i == j - c = one
     | otherwise = zero
 
+-- matA is in canonical form
 feasibleSolution :: forall a. OrderedField a => Matrix a -> Vector a -> Either Error { setB :: Array Int, xB :: Vector a }
 feasibleSolution matA b =
   let
@@ -92,7 +95,7 @@ feasibleSolution matA b =
   in
   case simplex' mat' obj' (n .. (n + m - 1)) (abs <$> b) of
     Left e -> Left e
-    Right x ->    
+    Right x ->
       if V.dot obj' x < zero then
         Left NoSolution
       else
@@ -104,16 +107,11 @@ feasibleSolution matA b =
           Right {setB, xB}
 
 simplex :: forall a. OrderedField a => Matrix a -> Vector a -> Vector a -> Either Error (Vector a)
-simplex matA b obj =
-  let
-    m = M.nrows matA
-    n = M.ncols matA
-    matA' = canonicalForm matA
-  in
-  case feasibleSolution matA' b of
-    Left e -> Left e
-    Right {setB, xB} ->
-        let
-          obj' = V.fromArray $ V.toArray obj <> replicate m zero
-        in
-          simplex' matA' obj' setB xB <#> (V.fromArray <<< take n <<< V.toArray)
+simplex matA b obj = do
+  let m = M.nrows matA
+  let n = M.ncols matA
+  let matA' = canonicalForm matA
+  {setB, xB} <- feasibleSolution matA' b
+  let obj' = V.fromArray $ V.toArray obj <> replicate m zero
+  sol <- simplex' matA' obj' setB xB
+  pure $ V.fromArray $ take n $ V.toArray sol
