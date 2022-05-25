@@ -1,16 +1,16 @@
 module Data.LinearProgramming.Program
-  ( Atom(..)
-  , Constraint(..)
-  , Expr(..)
-  , Objective(..)
-  , Program(..)
-  , atom
-  , solveLinearProgram
-  , (&<=&)
+  ( (&<=&)
   , (&==&)
   , (&>=&)
   , (**)
   , (++)
+  , Constraint(..)
+  , Expr
+  , Objective(..)
+  , Program(..)
+  , arrayOfVars
+  , atom
+  , solveLinearProgram
   )
   where
 
@@ -29,15 +29,10 @@ import Data.LinearProgramming.Class (class OrderedField)
 import Data.LinearProgramming.Simplex (Error, simplex)
 import Partial.Unsafe (unsafePartial)
 
-data Atom v c = Atom v c
+data Expr v c = Expr (Map v c)
 
-derive instance Functor (Atom v)
-
-
-data Expr v c = Expr (Array (Atom v c))
-
-instance Semigroup (Expr v c) where
-  append (Expr e1) (Expr e2) = Expr (e1 <> e2)
+instance (Ord v, Semiring c) => Semigroup (Expr v c) where
+  append (Expr e1) (Expr e2) = Expr (Map.unionWith (+) e1 e2)
 
 derive instance Functor (Expr v)
 
@@ -59,7 +54,7 @@ infix 4 GreaterOrEqual as &>=&
 infix 4 Equal as &==&
 
 atom :: forall v c. c -> v -> Expr v c
-atom coeff var = Expr [Atom var coeff]
+atom coeff var = Expr (Map.singleton var coeff)
 infix 6 atom as **
 
 infixr 5 append as ++
@@ -78,7 +73,7 @@ arrayOfVars (Program {objective, constraints})
     objVars = case objective of 
       Maximize expr -> exprVars expr
       Minimize expr -> exprVars expr
-    exprVars (Expr e) = Set.fromFoldable $ e <#> \(Atom v _) -> v
+    exprVars (Expr e) = Map.keys e
     cstrVars = Set.unions (cstrVars' <$> constraints)
     cstrVars' (LessOrEqual e _) = exprVars e
     cstrVars' (GreaterOrEqual e _) = exprVars e
@@ -106,11 +101,11 @@ solveLinearProgram program@(Program {objective, constraints}) = do
   cstrmat (LessOrEqual e _)=  [exprToVec e]
   cstrmat (GreaterOrEqual e _) = [negate <$> exprToVec e]
   cstrmat (Equal e _) = [exprToVec e, negate <$> exprToVec e]
-  cstrb :: Constraint v c -> Array c
   cstrb (LessOrEqual _ c) = [c]
   cstrb (GreaterOrEqual _ c) = [-c]
   cstrb (Equal _ c) = [c, -c]
   exprToVec (Expr e) = 
     let
-      update = e <#> \(Atom v c) -> Tuple (fromMaybe (-1) $ Map.lookup v reverseVars) c
+      update :: Array _
+      update = Map.toUnfoldable e <#> \(Tuple v c) -> Tuple (fromMaybe (-1) $ Map.lookup v reverseVars) c
     in replicate m zero # updateAtIndices update
