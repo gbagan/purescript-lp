@@ -15,6 +15,7 @@
     ],
     "dependencies": {
         "purescript-arrays": "^v7.0.0",
+        "purescript-bifunctors": "^v6.0.0",
         "purescript-either": "^v6.0.0",
         "purescript-foldable-traversable": "^v6.0.0",
         "purescript-linalg": "https://github.com/gbagan/purescript-linalg.git#v5.1.0",
