@@ -23,7 +23,7 @@
         "purescript-ordered-collections": "^v3.0.0",
         "purescript-partial": "^v4.0.0",
         "purescript-prelude": "^v6.0.0",
-        "purescript-rationals": "^v5.0.0",
+        "purescript-rationals": "https://github.com/gbagan/purescript-rationals.git#master",
         "purescript-tuples": "^v7.0.0"
     }
 }

@@ -13,12 +13,12 @@ import Data.LinearAlgebra.Vector as V
 import Data.LinearAlgebra.Vector (Vector)
 import Data.LinearProgramming.Class (class OrderedField)
 
-data Error = NoSolution | NotBounded
+data Error = Infeasible | NotBounded
 
 derive instance Eq Error
 
 instance Show Error where
-  show NoSolution = "NoSolution"
+  show Infeasible = "Infeasible"
   show NotBounded = "NotBounded"
 
 empty :: forall a. Vector a
@@ -97,7 +97,7 @@ feasibleSolution matA b =
     Left e -> Left e
     Right x ->
       if V.dot obj' x < zero then
-        Left NoSolution
+        Left Infeasible
       else
         let 
           setB' = 0 .. (n+m-1) # filter \j -> V.index x j > zero

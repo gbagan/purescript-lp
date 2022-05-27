@@ -4,13 +4,14 @@ module Data.LinearProgramming.Program
   , (&>=&)
   , (**)
   , (++)
+  , (+-)
   , Constraint(..)
   , Expr
   , Objective(..)
   , Program(..)
-  , arrayOfVars
+  , solve
   , atom
-  , solveLinearProgram
+  , exprSub
   )
   where
 
@@ -58,7 +59,12 @@ atom :: forall v c. c -> v -> Expr v c
 atom coeff var = Expr (Map.singleton var coeff)
 infix 6 atom as **
 
-infixr 5 append as ++
+infixl 5 append as ++
+
+exprSub :: forall v c. Ord v => Ring c => Expr v c -> Expr v c -> Expr v c
+exprSub e1 e2 = e1 ++ ((-one) <$> e2)
+
+infixl 5 exprSub as +-
 
 data Program v c = Program 
   { objective :: Objective v c
@@ -80,9 +86,9 @@ arrayOfVars (Program {objective, constraints})
     cstrVars' (GreaterOrEqual e _) = exprVars e
     cstrVars' (Equal e _) = exprVars e
 
-solveLinearProgram :: forall v c. Ord v => OrderedField c =>   
-                        Program v c -> Either Error (Map v c) 
-solveLinearProgram program@(Program {objective, constraints}) = do
+solve :: forall v c. Ord v => OrderedField c =>   
+            Program v c -> Either Error (Map v c) 
+solve program@(Program {objective, constraints}) = do
   sol <- simplex (M.fromArray n m matA) (V.fromArray b) (V.fromArray obj)
   pure $ 
     sol
