@@ -1,4 +1,4 @@
-module Data.LinearProgramming.Program
+module LinearProgramming.Program
   ( (&<=&)
   , (&==&)
   , (&>=&)
@@ -27,8 +27,8 @@ import Data.Maybe (fromMaybe, fromJust)
 import Data.Tuple (Tuple(..))
 import Data.LinearAlgebra.Matrix as M
 import Data.LinearAlgebra.Vector as V
-import Data.LinearProgramming.Class (class OrderedField)
-import Data.LinearProgramming.Simplex (Error, simplex)
+import LinearProgramming.Class (class OrderedField)
+import LinearProgramming.Simplex (Error, simplex)
 import Partial.Unsafe (unsafePartial)
 
 data Expr v c = Expr (Map v c)

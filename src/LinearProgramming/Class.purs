@@ -1,4 +1,4 @@
-module Data.LinearProgramming.Class where
+module LinearProgramming.Class where
 
 import Prelude
 import Data.Rational (Rational)

@@ -7,8 +7,8 @@ import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Data.LinearAlgebra.Matrix as M
 import Data.LinearAlgebra.Vector as V
-import Data.LinearProgramming.Simplex (Error(..), simplex)
-import Data.LinearProgramming.Program (Program(..), Objective(..), (++), (+-), (**), (&<=&), (&==&), solve)
+import LinearProgramming.Simplex (Error(..), simplex)
+import LinearProgramming.Program (Program(..), Objective(..), (++), (+-), (**), (&<=&), (&==&), solve)
 import Data.Map as Map
 import Data.Tuple (Tuple(..))
 import Test.Spec (describe, it)

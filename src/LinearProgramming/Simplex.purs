@@ -1,4 +1,4 @@
-module Data.LinearProgramming.Simplex (Error(..), simplex) where
+module LinearProgramming.Simplex (Error(..), simplex) where
 
 import Prelude
 import Data.Array ((..), (!!), difference, filter, find, replicate, sort, take, updateAtIndices, zip)
@@ -11,7 +11,7 @@ import Data.LinearAlgebra.Matrix as M
 import Data.LinearAlgebra.Matrix (Matrix)
 import Data.LinearAlgebra.Vector as V
 import Data.LinearAlgebra.Vector (Vector)
-import Data.LinearProgramming.Class (class OrderedField)
+import LinearProgramming.Class (class OrderedField)
 
 data Error = Infeasible | NotBounded
 
